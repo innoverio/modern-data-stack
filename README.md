@@ -7,6 +7,9 @@ blog to get a sense for the Hive connector architecture. [A gentle
 
 
 ## Goals
+
+TODO: update goals based on further content
+
 In this tutorial, you will:
  1. Learn how to run a CTAS (CREATE TABLE AS) statement in Trino.
  2. Learn the roles of the Trino runtime, metastore, and storage.
@@ -177,28 +180,37 @@ in MinIO when all we specify is the catalog, schema, and table? How does Trino
 know what columns exist in the orc file, and even the file it is retrieving
 is an orc file to being with? Find out more in the next step.
 
-### Data transformation with dbt
+### Trino security
 
-TODO
+TODO Configure LDAP with Identity server https://github.com/wso2/docker-is/
+TODO Configure LDAP within TRINO
+TODO Setup role security example
+
+### Data transformation with dbt without extract and load
+
+TODO setup sample DBT project, loading some data from the postgres db towards a iceberg table, See also https://medium.com/geekculture/trino-dbt-a-match-in-sql-heaven-1df2a3d12b5e
+
+### Pipeline scheduling and auditing with Dagster
+
+TODO install dagit and dagster daemon
+TODO register dbt project with dagster
+TODO show scheduling
+TODO show auditing
+
+### CDC with Debezium server and redis streams
+
+TODO Setup debezium server
+TODO Write to files on minio
 
 ### Data transformation with Spark
 
-TODO
+TODO demonstrate transformation with Spark
 
 ### Creating Iceberg tables
 
-TODO
+TODO explain why iceberg is important
 
-[A gentle
- introduction to Iceberg]https://trino.io/blog/2021/05/03/a-gentle-introduction-to-iceberg.html)
-
-### CDC with Debezium and Kafka
-
-TODO
-
-### Trino security
-
-TODO
+[A gentle introduction to Iceberg]https://trino.io/blog/2021/05/03/a-gentle-introduction-to-iceberg.html)
 
 ### Exploring the Hive Metastore
 

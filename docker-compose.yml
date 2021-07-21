@@ -1,38 +1,38 @@
 version: '3'
 services:
-  spark-master:
-    build: ./spark
-    container_name: spark
-    depends_on: 
-      - hive-metastore
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-    environment: 
-      SPARK_NO_DAEMONIZE: "true"
-    command: "start-master.sh"
+  # spark-master:
+  #   build: ./spark
+  #   container_name: spark
+  #   depends_on: 
+  #     - hive-metastore
+  #   ports:
+  #     - "8080:8080"
+  #     - "7077:7077"
+  #   environment: 
+  #     SPARK_NO_DAEMONIZE: "true"
+  #   command: "start-master.sh"
   
-  spark-worker1:
-    build: ./spark
-    container_name: spark-worker1
-    depends_on: 
-      - spark-master
-    ports:
-      - "8081:8081"
-    environment: 
-      SPARK_NO_DAEMONIZE: "true"
-    command: "start-slave.sh spark://spark-master:7077"
+  # spark-worker1:
+  #   build: ./spark
+  #   container_name: spark-worker1
+  #   depends_on: 
+  #     - spark-master
+  #   ports:
+  #     - "8081:8081"
+  #   environment: 
+  #     SPARK_NO_DAEMONIZE: "true"
+  #   command: "start-slave.sh spark://spark-master:7077"
 
-  spark-worker2:
-    build: ./spark
-    container_name: spark-worker2
-    depends_on: 
-      - spark-master
-    ports:
-      - "8082:8081"
-    environment: 
-      SPARK_NO_DAEMONIZE: "true"
-    command: "start-slave.sh spark://spark-master:7077"
+  # spark-worker2:
+  #   build: ./spark
+  #   container_name: spark-worker2
+  #   depends_on: 
+  #     - spark-master
+  #   ports:
+  #     - "8082:8081"
+  #   environment: 
+  #     SPARK_NO_DAEMONIZE: "true"
+  #   command: "start-slave.sh spark://spark-master:7077"
 
 
   hive-metastore:
@@ -42,6 +42,8 @@ services:
       - '9083:9083' # Metastore Thrift
     environment:
       METASTORE_DB_HOSTNAME: mariadb
+    networks:
+      - data_platform_network
     depends_on:
       - mariadb
 
@@ -56,6 +58,8 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
       MYSQL_DATABASE: metastore_db
+    networks:
+      - data_platform_network
 
   minio:
     hostname: minio
@@ -63,6 +67,8 @@ services:
     container_name: minio
     ports:
       - '9000:9000'
+    networks:
+      - data_platform_network
     # volumes:
     #   - './minio/data:/data'
     command: server /data
@@ -76,6 +82,117 @@ services:
     volumes:
       - './trino/trino-cli-358-executable.jar:/usr/bin/trino'
       - './trino/minio.properties:/etc/trino/catalog/minio.properties'
+      - './trino/postgres.properties:/etc/trino/catalog/postgres.properties'
+    networks:
+      - data_platform_network
+    depends_on:
+      - hive-metastore
+      - postgres
+
+  # redis:
+  #   hostname: redis
+  #   image: redis:latest
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - './redis:/usr/local/etc/redis'
+  #   command: redis-server /usr/local/etc/redis/redis.conf
+  
+  # debezium-server:
+  #   hostname: debezium-server
+  #   image: debezium/server:1.6
+  #   container_name: debezium-server
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./debezium/conf:/debezium/conf
+  #   depends_on:
+  #     - redis
+  #     - debezium-postgres
+
+  postgres:
+    hostname: postgres
+    image: debezium/example-postgres:1.6
+    container_name: debezium-postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - data_platform_network
+
+  dagit:
+    build: ./dagster
+    entrypoint:
+      - dagit
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+    container_name: dagit
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+    volumes: # Make docker client accessible so we can terminate containers from dagit
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - data_platform_network
+    depends_on:
+      - dagster_postgresql
+
+  # This service runs the dagster-daemon process, which is responsible for taking runs
+  # off of the queue and launching them, as well as creating runs from schedules or sensors.
+  dagster_daemon:
+    build: ./dagster
+    entrypoint:
+      - dagster-daemon
+      - run
+    container_name: dagster_daemon
+    restart: on-failure
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+    volumes: # Make docker client accessible so we can launch containers using host docker
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - data_platform_network
+    depends_on:
+      - dagster_postgresql
+      - example_pipelines
+  
+  dagster_postgresql:
+    image: postgres:11
+    container_name: dagster_postgresql
+    environment:
+      POSTGRES_USER: "postgres_user"
+      POSTGRES_PASSWORD: "postgres_password"
+      POSTGRES_DB: "postgres_db"
+    networks:
+      - data_platform_network
+
+  example_pipelines:
+    build: ./example_pipelines
+    container_name: example_pipelines
+    image: example_pipelines
+    restart: always
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+      DAGSTER_CURRENT_IMAGE: "example_pipelines"
+    networks:
+      - data_platform_network
+    depends_on:
+      - dagster_postgresql
 
   # mc-job:
   #   image: 'minio/mc:latest'
@@ -89,3 +206,9 @@ services:
   #     /usr/bin/mc mb --quiet presto/customer-data-orc;
   #     /usr/bin/mc mirror minio/customer-data-text presto/customer-data-text;
   #     "
+
+
+networks:
+  data_platform_network:
+    driver: bridge
+    name: data_platform_network
