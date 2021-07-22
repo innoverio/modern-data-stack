@@ -1,4 +1,8 @@
-FROM python:3.7-slim
+FROM python:3.8-buster
+
+RUN pip install -I dbt==0.20.0
+
+RUN pip install git+https://github.com/mdesmet/dbt-presto.git@master
 
 # Checkout and install dagster libraries needed to run the gRPC server
 # exposing your repository to dagit and dagster-daemon, and to load the DagsterInstance
@@ -6,7 +10,8 @@ FROM python:3.7-slim
 RUN pip install \
     dagster \
     dagster-postgres \
-    dagster-docker
+    dagster-docker \
+    dagster-dbt
 
 # Set $DAGSTER_HOME and copy dagster instance there
 
@@ -21,6 +26,7 @@ COPY dagster.yaml $DAGSTER_HOME
 WORKDIR /opt/dagster/app
 
 COPY repo.py /opt/dagster/app
+ADD dbt_project /opt/dagster/app/
 
 # Run dagster gRPC server on port 4000
 

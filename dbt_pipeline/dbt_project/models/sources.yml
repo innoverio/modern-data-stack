@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: inventory
+    tables:
+      - name: customers
+      - name: products
+      - name: orders

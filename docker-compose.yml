@@ -83,6 +83,7 @@ services:
       - './trino/trino-cli-358-executable.jar:/usr/bin/trino'
       - './trino/minio.properties:/etc/trino/catalog/minio.properties'
       - './trino/postgres.properties:/etc/trino/catalog/postgres.properties'
+      - './trino/config.properties:/etc/trino/config.properties'
     networks:
       - data_platform_network
     depends_on:
@@ -167,7 +168,7 @@ services:
       - data_platform_network
     depends_on:
       - dagster_postgresql
-      - example_pipelines
+      - dbt_pipeline
   
   dagster_postgresql:
     image: postgres:11
@@ -179,16 +180,16 @@ services:
     networks:
       - data_platform_network
 
-  example_pipelines:
-    build: ./example_pipelines
-    container_name: example_pipelines
-    image: example_pipelines
+  dbt_pipeline:
+    build: ./dbt_pipeline
+    container_name: dbt_pipeline
+    image: dbt_pipeline
     restart: always
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
-      DAGSTER_CURRENT_IMAGE: "example_pipelines"
+      DAGSTER_CURRENT_IMAGE: "dbt_pipeline"
     networks:
       - data_platform_network
     depends_on:
