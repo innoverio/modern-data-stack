@@ -102,9 +102,9 @@ us a location to write our data to and we can tell Trino where to find it.
 
 Now, open the [MinIO UI](http://localhost:9000) and log in using:
 
-Access Key: minio
+Access Key: minioadmin
 
-Secret Key: minio123
+Secret Key: minioadmin
 
 ![MinIO Login Screen](./assets/login.png)
 

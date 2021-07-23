@@ -14,7 +14,7 @@
   </property>
   <property>
       <name>javax.jdo.option.ConnectionDriverName</name>
-      <value>com.mysql.jdbc.Driver</value>
+      <value>com.mysql.cj.jdbc.Driver</value>
   </property>
   <property>
       <name>javax.jdo.option.ConnectionURL</name>
@@ -30,16 +30,12 @@
   </property>
 
   <property>
-      <name>fs.s3a.impl</name>
-      <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
-  </property>
-  <property>
       <name>fs.s3a.access.key</name>
-      <value>minio_access_key</value>
+      <value>minioadmin</value>
   </property>
   <property>
       <name>fs.s3a.secret.key</name>
-      <value>minio_secret_key</value>
+      <value>minioadmin</value>
   </property>
   <property>
       <name>fs.s3a.endpoint</name>
@@ -49,4 +45,9 @@
       <name>fs.s3a.path.style.access</name>
       <value>true</value>
   </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>s3a://hive/warehouse</value>
+  </property>
+
 </configuration>

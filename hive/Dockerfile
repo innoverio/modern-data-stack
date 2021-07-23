@@ -7,6 +7,8 @@ ENV METASTORE_VERSION=3.0.0
 
 ENV HADOOP_HOME=/opt/hadoop-${HADOOP_VERSION}
 ENV HIVE_HOME=/opt/apache-hive-metastore-${METASTORE_VERSION}-bin
+ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.11.375.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.2.0.jar
+ENV JAVA_HOME=/usr/local/openjdk-8
 
 RUN curl -L https://downloads.apache.org/hive/hive-standalone-metastore-${METASTORE_VERSION}/hive-standalone-metastore-${METASTORE_VERSION}-bin.tar.gz | tar zxf - && \
     curl -L https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz | tar zxf - && \
@@ -17,7 +19,6 @@ RUN curl -L https://downloads.apache.org/hive/hive-standalone-metastore-${METAST
 RUN apt-get update && apt-get install -y netcat
 
 COPY entrypoint.sh /entrypoint.sh
-COPY conf/metastore-site.xml /opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml
 
 # RUN groupadd -r hive --gid=1000 && \
 #     useradd -r -g hive --uid=1000 -d ${HIVE_HOME} hive && \

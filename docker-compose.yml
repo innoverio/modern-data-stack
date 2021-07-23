@@ -36,16 +36,21 @@ services:
 
 
   hive-metastore:
+    hostname: hive-metastore
     build: ./hive
     container_name: hive-metastore
     ports:
       - '9083:9083' # Metastore Thrift
+    volumes:
+      - './hive/conf/metastore-site.xml:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml'
+      - './hive/conf/core-site.xml:/opt/hadoop-3.2.0/etc/hadoop/core-site.xml'
     environment:
       METASTORE_DB_HOSTNAME: mariadb
     networks:
       - data_platform_network
     depends_on:
       - mariadb
+      - minio
 
   mariadb:
     hostname: mariadb
@@ -69,8 +74,8 @@ services:
       - '9000:9000'
     networks:
       - data_platform_network
-    # volumes:
-    #   - './minio/data:/data'
+    volumes:
+      - './minio/data:/data'
     command: server /data
 
   trino:
@@ -83,6 +88,8 @@ services:
       - './trino/trino-cli-358-executable.jar:/usr/bin/trino'
       - './trino/minio.properties:/etc/trino/catalog/minio.properties'
       - './trino/postgres.properties:/etc/trino/catalog/postgres.properties'
+      - './trino/datalake.properties:/etc/trino/catalog/datalake.properties'
+      - './trino/iceberg.properties:/etc/trino/catalog/iceberg.properties'
       - './trino/config.properties:/etc/trino/config.properties'
     networks:
       - data_platform_network
@@ -197,17 +204,16 @@ services:
 
   # mc-job:
   #   image: 'minio/mc:latest'
-  #   environment:
-  #     MC_HOST_presto: "http://minioadmin:minioadmin@http://127.0.0.1:9000/"
   #   volumes:
   #     - './minio/data:/minio'
   #   entrypoint: |
   #     /bin/bash -c "
-  #     /usr/bin/mc mb --quiet presto/customer-data-text;
-  #     /usr/bin/mc mb --quiet presto/customer-data-orc;
-  #     /usr/bin/mc mirror minio/customer-data-text presto/customer-data-text;
+  #     sleep 5;
+  #     /usr/bin/mc config --quiet host add myminio http://minio:9000 minioadmin minioadmin;
+  #     /usr/bin/mc mb --quiet myminio/datalake
   #     "
-
+  #   depends_on:
+  #     - minio
 
 networks:
   data_platform_network:

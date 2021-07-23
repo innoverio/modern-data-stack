@@ -33,5 +33,5 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   trino_project:
       materialized: table
-      catalog: postgres
-      schema: public
+      catalog: iceberg
+      schema: datalake
