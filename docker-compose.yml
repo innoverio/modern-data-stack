@@ -84,7 +84,7 @@ services:
     image: 'trinodb/trino'
     container_name: trino
     ports:
-      - '8888:8080'
+      - '8080:8080'
     volumes:
       - './trino/trino-cli-358-executable.jar:/usr/bin/trino'
       - './trino/minio.properties:/etc/trino/catalog/minio.properties'
