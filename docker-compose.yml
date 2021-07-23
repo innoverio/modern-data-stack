@@ -72,11 +72,12 @@ services:
     container_name: minio
     ports:
       - '9000:9000'
+      - '9001:9001'
     networks:
       - data_platform_network
     volumes:
       - './minio/data:/data'
-    command: server /data
+    command: server /data --console-address ":9001"
 
   trino:
     hostname: trino
