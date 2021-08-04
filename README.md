@@ -186,6 +186,8 @@ TODO Configure LDAP with Identity server https://github.com/wso2/docker-is/
 TODO Configure LDAP within TRINO
 TODO Setup role security example
 
+See also https://www.linkedin.com/pulse/query-fabric-data-lake-mesh-federation-starburst-trino-alberto-miorin/
+
 ### Data transformation with dbt without extract and load
 
 <img src="./assets/logos.png" width="50%" height="50%">
