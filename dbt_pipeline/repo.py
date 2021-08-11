@@ -4,12 +4,16 @@ from dagster_dbt import dbt_cli_resource
 my_dbt_resource = dbt_cli_resource.configured({"profiles_dir": "."})
 
 @solid(required_resource_keys={"dbt"})
-def run_all_models(context):
+def run_all_seeds(context):
+    context.resources.dbt.seed()
+
+@solid(required_resource_keys={"dbt"})
+def run_all_models(context, seeds):
     context.resources.dbt.run()
 
 @pipeline(mode_defs=[ModeDefinition(resource_defs={"dbt": my_dbt_resource})])
 def my_dbt_pipeline():
-    run_all_models()
+    run_all_models(run_all_seeds())
 
 
 @schedule(cron_schedule="0 * * * *", pipeline_name="my_dbt_pipeline", execution_timezone="US/Central")

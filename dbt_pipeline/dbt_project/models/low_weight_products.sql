@@ -1,7 +1,7 @@
 {{
   config(
     materialized='table',
-    with_props={
+    properties={
       "format": "'PARQUET'",
       "partitioning": "ARRAY['bucket(id, 2)']",
     }

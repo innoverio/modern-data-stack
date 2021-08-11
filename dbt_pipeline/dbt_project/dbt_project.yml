@@ -32,6 +32,14 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 models:
   trino_project:
-      materialized: table
-      catalog: iceberg
-      schema: datalake
+      +materialized: table
+      +catalog: iceberg
+      +schema: datalake
+
+seeds:
+  trino_project:
+      +catalog: iceberg
+      +schema: datalake
+      +properties:
+          format: "'PARQUET'"
+          partitioning: ARRAY['bucket(series_reference, 2)']

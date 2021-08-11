@@ -2,7 +2,7 @@ FROM python:3.8-buster
 
 RUN pip install -I dbt==0.20.0
 
-RUN pip install git+https://github.com/mdesmet/dbt-presto.git@d82232f91b1185a809de250bf4e5751c54a84dc7
+RUN pip install git+https://github.com/mdesmet/dbt-presto.git@827d676caacb6ab50f4dd7ef43ddad0206d70c2b
 
 # Checkout and install dagster libraries needed to run the gRPC server
 # exposing your repository to dagit and dagster-daemon, and to load the DagsterInstance
